@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>قائمة المستخدمين</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>قائمة المستخدمين</h1>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>الاسم</th>
+          <th>البريد الإلكتروني</th>
+        </tr>
+      </thead>
+      <tbody id="userList">
+     
+      </tbody>
+    </table>
+    <br>
+    <a href="add_user.html">
+      <button>إضافة مستخدم جديد</button>
+    </a>
+  </div>
+  <script>
+    async function fetchUsers() {
+      const response = await fetch('/users');
+      const users = await response.json();
+      const userList = document.getElementById('userList');
+
+      users.forEach((user, index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${index + 1}</td>
+          <td>${user.name}</td>
+          <td>${user.email}</td>
+        `;
+        userList.appendChild(row);
+      });
+    }
+
+    fetchUsers();
+  </script>
+</body>
+</html>
