@@ -1,7 +1,8 @@
 import 'dart:convert';
-
-import 'package:my_server/app/models/user.dart';
+import 'package:my_server/app/exceptions/response_exception.dart';
+import 'package:my_server/packages/schema.dart';
 import 'package:my_server/packages/server_info.dart';
+import 'package:mysql1/mysql1.dart';
 import 'package:shelf/shelf.dart';
 
 class UserController {
@@ -16,48 +17,47 @@ class UserController {
 
       return Response.ok(jsonEncode(users),
           headers: {'Content-Type': 'application/json'});
+    } on MySqlException catch (e) {
+      return ResponseException.mysqlException(e);
     } catch (e) {
-      return Response.internalServerError(body: 'Error: $e');
+      return ResponseException.exception(e);
     } finally {
       await dbConnection.close();
     }
   }
 
   static Future<Response> add(Request request) async {
-    final payload = await request.readAsString();
-    final Map<String, dynamic> data =
-        jsonDecode(payload) as Map<String, dynamic>;
-    if (data['email'] == null ||
-        data['name'] == null ||
-        data['password'] == null) {
-      return Response.badRequest(
-          body: 'الاسم أو البريد الإلكتروني أو كلمة المرور مفقود.');
-    }
-    final dbConnection = await ServerInfo.connectToDatabase();
     try {
-      addRow(table: "user", elements: {
-        "email": data['email'] as String,
-        "name": data['name'] as String,
-        "password": data['password'] as String
-      });
+      final payload = await request.readAsString();
+      final Map<String, dynamic> data =
+          jsonDecode(payload) as Map<String, dynamic>;
+      if (data['email'] == null ||
+          data['name'] == null ||
+          data['password'] == null) {
+        return Response.badRequest(
+            body: jsonEncode({
+              'error': 'الاسم أو البريد الإلكتروني أو كلمة المرور مفقود.',
+            }),
+            headers: {'Content-Type': 'application/json'});
+      }
 
-      return Response.ok('تم إضافة المستخدم بنجاح.');
+      final dbConnection = await ServerInfo.connectToDatabase();
+      try {
+        await Schema.addRow(table: "user", elements: {
+          "email": data['email'] as String,
+          "name": data['name'] as String,
+          "password": data['password'] as String
+        });
+
+        return Response.ok(jsonEncode({'message': 'تم إضافة المستخدم بنجاح.'}),
+            headers: {'Content-Type': 'application/json'});
+      } on MySqlException catch (e) {
+        return ResponseException.mysqlException(e);
+      } finally {
+        await dbConnection.close();
+      }
     } catch (e) {
-      return Response.internalServerError(body: 'Error: $e');
-    } finally {
-      await dbConnection.close();
+      return ResponseException.exception(e);
     }
-  }
-}
-
-Future<void> addRow(
-    {required String table, required Map<String, String> elements}) async {
-  try {
-    final dbConnection = await ServerInfo.connectToDatabase();
-    dbConnection.query(
-        "INSERT INTO $table (${elements.keys.join(', ')}) VALUES (${List.filled(elements.keys.length, '?').join(", ")})",
-        elements.values.toList());
-  } catch (e) {
-    rethrow;
   }
 }
