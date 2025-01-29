@@ -24,14 +24,6 @@ void main() async {
           .map((row) => {'id': row[0], 'name': row[1], 'email': row[2]})
           .toList();
 
-      return Response.ok(jsonEncode(users),
-          headers: {'Content-Type': 'application/json'});
-    } catch (e) {
-      return Response.internalServerError(body: 'Error: $e');
-    } finally {
-      await dbConnection.close();
-    }
-  });
 
   router.post('/add-user', (Request request) async {
     final payload = await request.readAsString();
