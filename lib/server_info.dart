@@ -10,10 +10,10 @@ class Pram {
     return this;
   }
 
-  Pram key() {value = "$value AUTO_INCREMENT PRIMARY KEY";
-  return this;
+  Pram key() {
+    value = "$value AUTO_INCREMENT PRIMARY KEY";
+    return this;
   }
-  
 }
 
 class ServerInfo {
@@ -38,6 +38,12 @@ class ServerInfo {
 
   static Future<void> createTable(String tableName, List<String> param) async {
     final db = await connectToDatabase();
-    await db.query('CREATE TABLE $tableName (${param.join(', ')});');
+    try {
+      await db.query('CREATE TABLE $tableName (${param.join(', ')});');
+    } catch (e) {
+      rethrow;
+    } finally {
+      db.close();
+    }
   }
 }
