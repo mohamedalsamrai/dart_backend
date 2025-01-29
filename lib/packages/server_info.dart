@@ -1,5 +1,5 @@
 import 'package:dotenv/dotenv.dart';
-import 'package:my_server/routes/routes.dart';
+import 'package:my_server/app/routes/routes.dart';
 import 'package:mysql1/mysql1.dart';
 import 'package:shelf/shelf_io.dart' as io;
 import 'package:shelf/shelf.dart';
@@ -40,7 +40,7 @@ class ServerInfo {
   }
  static Future<void> runServer() async {
     Routes.call();
-    final handler = Cascade().add(Routes.indexRoute).add(Routes.router).handler;
+    final handler = Cascade().add(Routes.indexRoute).add(Routes.router.call).handler;
 
     final server =
         await io.serve(handler, _host!, int.parse(_serverPort!));

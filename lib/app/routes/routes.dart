@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:my_server/server_info.dart';
+import 'package:my_server/packages/server_info.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:shelf_static/shelf_static.dart';
