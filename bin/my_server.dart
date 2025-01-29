@@ -7,12 +7,19 @@ import 'package:shelf_static/shelf_static.dart';
 
 void main() async {
   final router = Router();
+  
 
+  ServerInfo.createTable(
+    "test",
+    [
+      Pram("id").type("int").key().value,
+    ],
+  );
   router.get('/users', (Request request) async {
     final dbConnection = await ServerInfo.connectToDatabase();
     try {
       final results =
-          await dbConnection.query('SELECT id, name, email FROM users');
+          await dbConnection.query('SELECT id, name, email FROM user');
       final users = results
           .map((row) => {'id': row[0], 'name': row[1], 'email': row[2]})
           .toList();
@@ -32,16 +39,17 @@ void main() async {
 
     final name = data['name'];
     final email = data['email'];
+    final password = data['password'];
 
-    if (name == null || email == null) {
+    if (name == null || email == null || password == null) {
       return Response.badRequest(body: 'الاسم أو البريد الإلكتروني مفقود.');
     }
 
     final dbConnection = await ServerInfo.connectToDatabase();
     try {
       await dbConnection.query(
-        'INSERT INTO users (name, email) VALUES (?, ?)',
-        [name, email],
+        'INSERT INTO user (name, email, password) VALUES (?, ?, ?)',
+        [name, email, password],
       );
 
       return Response.ok('تم إضافة المستخدم بنجاح.');

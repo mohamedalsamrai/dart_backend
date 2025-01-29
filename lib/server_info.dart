@@ -1,6 +1,21 @@
 import 'package:dotenv/dotenv.dart';
 import 'package:mysql1/mysql1.dart';
 
+class Pram {
+  Pram(this.name) : value = name;
+  String name;
+  String value;
+  Pram type(String type) {
+    value = "$value $type";
+    return this;
+  }
+
+  Pram key() {value = "$value AUTO_INCREMENT PRIMARY KEY";
+  return this;
+  }
+  
+}
+
 class ServerInfo {
   static final env = DotEnv(includePlatformEnvironment: true)..load();
   static final sqlPort = env["Sql_Port"];
@@ -10,7 +25,7 @@ class ServerInfo {
   static final database = env["Database"];
   static final serverPort = env["Server_Port"];
 
- static Future<MySqlConnection> connectToDatabase() async {
+  static Future<MySqlConnection> connectToDatabase() async {
     final settings = ConnectionSettings(
       host: host!,
       port: int.parse(sqlPort!),
@@ -19,5 +34,10 @@ class ServerInfo {
       db: database,
     );
     return await MySqlConnection.connect(settings);
+  }
+
+  static Future<void> createTable(String tableName, List<String> param) async {
+    final db = await connectToDatabase();
+    await db.query('CREATE TABLE $tableName (${param.join(', ')});');
   }
 }

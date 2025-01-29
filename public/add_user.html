@@ -15,7 +15,11 @@
       
       <label for="email">البريد الإلكتروني:</label>
       <input type="email" id="email" name="email" placeholder="أدخل البريد الإلكتروني" required>
-      
+
+
+      <label for="password">كلمة المرور :</label>
+      <input type="password" id="password" name="password" placeholder="أدخل كامة المرور" required>
+
       <button type="submit">إضافة المستخدم</button>
     </form>
     <br>
@@ -29,12 +33,13 @@
       event.preventDefault();
       const name = document.getElementById('name').value;
       const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
 
       try {
         const response = await fetch('/add-user', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, email }),
+          body: JSON.stringify({ name, email ,password}),
         });
 
         if (response.ok) {
