@@ -25,20 +25,20 @@ class UserController {
 
   static Future<Response> add(Request request) async {
     final payload = await request.readAsString();
-    final data = jsonDecode(payload) as Map<String, dynamic>;
-    final User user = User(
-        email: data['email'], name: data['name'], password: data['password']);
-
-    if (user != null) {
-      return Response.badRequest(body: 'الاسم أو البريد الإلكتروني مفقود.');
+    final Map<String, dynamic> data =
+        jsonDecode(payload) as Map<String, dynamic>;
+    if (data['email'] == null ||
+        data['name'] == null ||
+        data['password'] == null) {
+      return Response.badRequest(
+          body: 'الاسم أو البريد الإلكتروني أو كلمة المرور مفقود.');
     }
-
     final dbConnection = await ServerInfo.connectToDatabase();
     try {
-      addRow(table: "user", alment: {
-        "email": user.email,
-        "name": user.name,
-        "password": user.password
+      addRow(table: "user", elements: {
+        "email": data['email'] as String,
+        "name": data['name'] as String,
+        "password": data['password'] as String
       });
 
       return Response.ok('تم إضافة المستخدم بنجاح.');
@@ -51,9 +51,13 @@ class UserController {
 }
 
 Future<void> addRow(
-    {required String table, required Map<String, String> alment}) async {
-  final dbConnection = await ServerInfo.connectToDatabase();
-  dbConnection.query(
-      "INSERT INTO $table (${alment.keys.join(', ')}) VALUES (${List.filled(alment.keys.length, '?').join(", ")})",
-      alment.values.toList());
+    {required String table, required Map<String, String> elements}) async {
+  try {
+    final dbConnection = await ServerInfo.connectToDatabase();
+    dbConnection.query(
+        "INSERT INTO $table (${elements.keys.join(', ')}) VALUES (${List.filled(elements.keys.length, '?').join(", ")})",
+        elements.values.toList());
+  } catch (e) {
+    rethrow;
+  }
 }
