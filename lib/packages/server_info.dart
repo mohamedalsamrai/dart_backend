@@ -4,21 +4,6 @@ import 'package:mysql1/mysql1.dart';
 import 'package:shelf/shelf_io.dart' as io;
 import 'package:shelf/shelf.dart';
 
-class Pram {
-  Pram(this.name) : value = name;
-  String name;
-  String value;
-  Pram type(String type) {
-    value = "$value $type";
-    return this;
-  }
-
-  Pram key() {
-    value = "$value AUTO_INCREMENT PRIMARY KEY";
-    return this;
-  }
-}
-
 class ServerInfo {
   static final _env = DotEnv(includePlatformEnvironment: true)..load();
   static final _sqlPort = _env["Sql_Port"];
@@ -45,15 +30,5 @@ class ServerInfo {
     final server =
         await io.serve(handler, _host!, int.parse(_serverPort!));
     print('🚀 Server running on http://${server.address.host}:${server.port}');
-  }
-  static Future<void> createTable(String tableName, List<String> param) async {
-    final db = await connectToDatabase();
-    try {
-      await db.query('CREATE TABLE $tableName (${param.join(', ')});');
-    } catch (e) {
-      rethrow;
-    } finally {
-      db.close();
-    }
   }
 }
